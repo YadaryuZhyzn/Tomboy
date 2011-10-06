@@ -443,7 +443,7 @@ namespace Tomboy
 
 		static void OpenSearchAll (object sender, EventArgs args)
 		{
-			NoteRecentChanges.GetInstance (manager).Present ();
+			Dashboard.GetInstance (manager).Present ();
 		}
 
 		public static NoteManager DefaultNoteManager
