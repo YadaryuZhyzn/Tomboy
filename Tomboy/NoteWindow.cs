@@ -806,7 +806,8 @@ namespace Tomboy
 		Gtk.Entry entry;
 		Gtk.Button next_button;
 		Gtk.Button prev_button;
-
+		Gtk.Label labelCount = new Gtk.Label (); //Label of current find matches and current position in List of Matches.
+		
 		List<Match> current_matches;
 		string prev_search_text;
 
@@ -839,7 +840,10 @@ namespace Tomboy
 			entry.Activated += OnFindEntryActivated;
 			entry.Show ();
 			PackStart (entry, true, true, 0);
-
+			
+			labelCount.Show ();
+			PackStart (labelCount, false,false, 0);
+			
 			prev_button = new Gtk.Button (Catalog.GetString ("_Previous"));
 			prev_button.Image = new Gtk.Arrow (Gtk.ArrowType.Left, Gtk.ShadowType.None);
 			prev_button.Relief = Gtk.ReliefStyle.None;
@@ -866,7 +870,26 @@ namespace Tomboy
 			entry.KeyPressEvent += KeyPressed;
 			entry.KeyReleaseEvent += KeyReleased;
 		}
-
+		
+		/// <summary>
+		/// Updates the match count.
+		/// </summary>
+		/// <param name='location'>
+		/// Current location in the List of Matched notes
+		/// </param>
+		protected void updateMatchCount (int location)
+		{
+			labelCount.Text = Catalog.GetString ("{0} of {1}", (location + 1), current_matches.Count);
+		}
+		
+		/// <summary>
+		/// Clears the match count.
+		/// </summary>
+		protected void clearMatchCount ()
+		{
+			labelCount.Text = "";
+		}
+		
 		protected override void OnShown ()
 		{
 			entry.GrabFocus ();
@@ -911,11 +934,12 @@ namespace Tomboy
 				Gtk.TextIter end = buffer.GetIterAtMark (match.EndMark);
 
 				if (end.Offset < cursor.Offset) {
+					updateMatchCount (current_matches.IndexOf (match));
 					JumpToMatch (match);
 					return;
 				}
 			}
-
+			updateMatchCount (current_matches.Count - 1);
 			// Wrap to first match
 			JumpToMatch (current_matches [current_matches.Count - 1] as Match);
 		}
@@ -933,11 +957,12 @@ namespace Tomboy
 				Gtk.TextIter start = buffer.GetIterAtMark (match.StartMark);
 
 				if (start.Offset >= cursor.Offset) {
+					updateMatchCount (current_matches.IndexOf (match));
 					JumpToMatch (match);
 					return;
 				}
 			}
-
+			updateMatchCount(0);
 			// Else wrap to first match
 			JumpToMatch (current_matches [0] as Match);
 		}
@@ -1031,6 +1056,7 @@ namespace Tomboy
 			if (SearchText == null) {
 				next_button.Sensitive = false;
 				prev_button.Sensitive = false;
+				clearMatchCount ();
 			}
 
 			if (current_matches != null && current_matches.Count > 0) {
@@ -1039,6 +1065,7 @@ namespace Tomboy
 			} else {
 				next_button.Sensitive = false;
 				prev_button.Sensitive = false;
+				clearMatchCount ();
 			}
 		}
 
