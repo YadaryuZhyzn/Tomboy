@@ -25,7 +25,7 @@ for arg in $*; do
 done
 
 if [ -n "$TOMBOY_DEBUG" -o -n "$TOMBOY_TRACE" -o -n "$TOMBOY_PROFILE" -o -n "$MONO_EXTRA_ARGS" ]; then
-    MONO_OPTIONS="$TOMBOY_DEBUG $TOMBOY_TRACE $TOMBOY_PROFILE $MONO_EXTRA_ARGS"
+    MONO_OPTIONS="$TOMBOY_DEBUG $TOMBOY_TRACE $TOMBOY_PROFILE $MONO_EXTRA_ARGS --runtime=v4.0"
     echo "** Running Mono with $MONO_OPTIONS **"
 fi
 
