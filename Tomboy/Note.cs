@@ -526,14 +526,17 @@ namespace Tomboy
 
 			try {
 				NoteArchiver.Write (filepath, data.GetDataSynchronized ());
+				Logger.Debug ("Finished calling NoteArchiver to save Note");
 			} catch (Exception e) {
 				// Probably IOException or UnauthorizedAccessException?
 				Logger.Error ("Exception while saving note: " + e.ToString ());
 				NoteUtils.ShowIOErrorDialog (window);
 			}
 
-			if (Saved != null)
+			if (Saved != null) {
+				Logger.Debug ("Saved flag did not equal null");
 				Saved (this);
+			}
 		}
 
 		//
@@ -1486,26 +1489,30 @@ namespace Tomboy
 		public virtual void WriteFile (string write_file, NoteData note)
 		{
 			string tmp_file = write_file + ".tmp";
-
+			Logger.Debug ("Setting tmp_file {0}", tmp_file);
 			using (var xml = XmlWriter.Create (tmp_file, XmlEncoder.DocumentSettings))
 				Write (xml, note);
 
 			if (File.Exists (write_file)) {
+				Logger.Debug ("tmp file {0} exists", write_file);
 				string backup_path = write_file + "~";
-				if (File.Exists (backup_path))
+				if (File.Exists (backup_path)) {
 					File.Delete (backup_path);
-
+					Logger.Debug ("Successfully deleted {0} backup file", backup_path);
+				}
 				// Backup the to a ~ file, just in case
 				File.Move (write_file, backup_path);
-
+				Logger.Debug ("Moving {0} backup file to {1}", write_file, backup_path);
 				// Move the temp file to write_file
 				File.Move (tmp_file, write_file);
-
+				Logger.Debug ("Moving {0} temp file to {1}", tmp_file, write_file);
 				// Delete the ~ file
 				File.Delete (backup_path);
+				Logger.Debug ("Successfully deleted backup file {0}", backup_path);
 			} else {
 				// Move the temp file to write_file
 				File.Move (tmp_file, write_file);
+				Logger.Debug ("Skipping all other and just movning the file");
 			}
 		}
 

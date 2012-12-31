@@ -47,6 +47,7 @@ namespace Tomboy.Sync
 
 		private void Parse (string manifestPath)
 		{
+			Logger.Debug ("TomboySyncClient Parse ({0})", manifestPath);
 			// Set defaults before parsing
 			lastSyncDate = DateTime.Today.AddDays (-1);
 			lastSyncRev = -1;
@@ -133,6 +134,7 @@ namespace Tomboy.Sync
 			} finally {
 				fs.Close ();
 			}
+			Logger.Debug ("TomboySyncClient Finished Parse ({0})", manifestPath);
 		}
 
 		private void Write (string manifestPath)

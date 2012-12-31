@@ -277,13 +277,17 @@ namespace Tomboy.Sync
 					Logger.Debug ("Autosync pref changed...restarting sync timer");
 					autosyncTimeoutPrefMinutes = autosyncTimeoutPrefMinutes >= 5 ? autosyncTimeoutPrefMinutes : 5;
 					lastBackgroundCheck = DateTime.Now;
+					Logger.Debug ("Autosync lastBackgroundCheck {0}", lastBackgroundCheck);
 					 // Perform a sync no sooner than user specified
 					currentAutosyncTimeoutMinutes = autosyncTimeoutPrefMinutes;
+					Logger.Debug ("CurrentAutosyncTimeoutMinutes {0}", currentAutosyncTimeoutMinutes);
 					autosyncTimer = new Timer ((o) => BackgroundSyncChecker (),
 					                           null,
 					                           currentAutosyncTimeoutMinutes * 60000,
 					                           autosyncTimeoutPrefMinutes * 60000);
+					Logger.Debug ("Autosync - dropping NoteBuffereChanged listener");
 					NoteMgr.NoteBufferChanged -= HandleNoteBufferChanged;
+					Logger.Debug ("Autosync - connecting to NoteBuffereChanged listener");
 					NoteMgr.NoteBufferChanged += HandleNoteBufferChanged;
 				}
 			}
@@ -291,8 +295,10 @@ namespace Tomboy.Sync
 
 		static void BackgroundSyncChecker ()
 		{
+			Logger.Debug ("BackgroundSyncChecker ()");
 			lastBackgroundCheck = DateTime.Now;
 			currentAutosyncTimeoutMinutes = autosyncTimeoutPrefMinutes;
+			Logger.Debug ("BackgroundSyncChecker currentAutosyncTimeoutMinutes {0}", currentAutosyncTimeoutMinutes);
 			if (syncThread != null)
 				return;
 			var addin = GetConfiguredSyncService ();
@@ -300,6 +306,7 @@ namespace Tomboy.Sync
 				// TODO: block sync while checking
 				SyncServer server = null;
 				try {
+					Logger.Debug ("Creating SyncServer");
 					server = addin.CreateSyncServer ();
 					if (server == null)
 						throw new Exception ("addin.CreateSyncServer () returned null");
@@ -311,6 +318,7 @@ namespace Tomboy.Sync
 				}
 				bool serverHasUpdates = false;
 				bool clientHasUpdates = client.DeletedNoteTitles.Count > 0;
+				Logger.Debug ("clientHasUpdates {0}", clientHasUpdates);
 				if (!clientHasUpdates) {
 					foreach (Note note in new List<Note> (NoteMgr.Notes)) {
 						if (client.GetRevision (note) == -1 ||
@@ -332,7 +340,7 @@ namespace Tomboy.Sync
 					addin.PostSyncCleanup ();
 					return;
 				}
-
+				Logger.Debug ("PostSyncCleanup");
 				addin.PostSyncCleanup (); // Let FUSE unmount, etc
 
 				if (clientHasUpdates || serverHasUpdates) {
@@ -376,8 +384,10 @@ namespace Tomboy.Sync
 		/// </summary>
 		public static void SynchronizationThread ()
 		{
+			Logger.Debug ("SynchronizationThread ()");
 			SyncServiceAddin addin = null;
 			SyncServer server = null;
+			Logger.Debug ("suspendEvent.Reset()");
 			suspendEvent.Reset();
 			try {
 
@@ -409,7 +419,7 @@ namespace Tomboy.Sync
 
 				// TODO: Call something that processes all queued note saves!
 				//       For now, only saving before uploading (not sufficient for note conflict handling)
-
+				Logger.Debug ("SetState AcquiringLock");
 				SetState (SyncState.AcquiringLock);
 				// TODO: We should really throw exceptions from BeginSyncTransaction ()
 				if (!server.BeginSyncTransaction ()) {
@@ -465,6 +475,7 @@ namespace Tomboy.Sync
 
 								// Suspend this thread while the GUI is presented to
 								// the user.
+								Logger.Debug ("Suspending sync thread to present GUI");
 								suspendEvent.WaitOne();
 							}
 						}
@@ -473,7 +484,7 @@ namespace Tomboy.Sync
 
 				if (noteUpdates.Count > 0)
 					SetState (SyncState.Downloading);
-
+				Logger.Debug ("SyncSate.Downloading");
 				// TODO: Figure out why GUI doesn't always update smoothly
 
 				// Process updates from the server; the bread and butter of sync!
@@ -521,6 +532,7 @@ namespace Tomboy.Sync
 							UpdateNoteInMainThread (existingNote, noteUpdate);
 					}
 				}
+				Logger.Debug ("GtkInvokeAndWait, building localNotes");
 
 				// Note deletion may affect the GUI, so we have to use the
 				// delegate to run in the main gtk thread.
@@ -545,7 +557,7 @@ namespace Tomboy.Sync
 				});
 
 				// TODO: Add following updates to syncDialog treeview
-
+				Logger.Debug ("SyncClient.PrepareUpload");
 				SetState (SyncState.PrepareUpload);
 				// Look through all the notes modified on the client
 				// and upload new or modified ones to the server
@@ -662,6 +674,7 @@ namespace Tomboy.Sync
 
 		private static void CreateNoteInMainThread (NoteUpdate noteUpdate)
 		{
+			Logger.Debug ("CreateNoteInMainThread");
 			// Note creation may affect the GUI, so we have to use the
 			// delegate to run in the main gtk thread.
 			// To be consistent, any exceptions in the delgate will be caught
@@ -674,6 +687,7 @@ namespace Tomboy.Sync
 
 		private static void UpdateNoteInMainThread (Note existingNote, NoteUpdate noteUpdate)
 		{
+			Logger.Debug ("UpdateNoteInMainThread");
 			// Note update may affect the GUI, so we have to use the
 			// delegate to run in the main gtk thread.
 			// To be consistent, any exceptions in the delgate will be caught
@@ -685,6 +699,7 @@ namespace Tomboy.Sync
 
 		private static void RecreateNoteInMainThread (Note existingNote, NoteUpdate noteUpdate)
 		{
+			Logger.Debug ("RecreateNoteInMainThread");
 			// Note deletion may affect the GUI, so we have to use the
 			// delegate to run in the main gtk thread.
 			// To be consistent, any exceptions in the delgate will be caught
@@ -699,6 +714,7 @@ namespace Tomboy.Sync
 
 		private static void UpdateLocalNote (Note localNote, NoteUpdate serverNote, NoteSyncType syncType)
 		{
+			Logger.Debug ("UpdateLocalNote");
 			// In each case, update existingNote's content and revision
 			try {
 				localNote.LoadForeignNoteXml (serverNote.XmlContent, ChangeType.OtherDataChanged);
@@ -724,6 +740,7 @@ namespace Tomboy.Sync
 
 		public static bool SynchronizedNoteXmlMatches (string noteXml1, string noteXml2)
 		{
+			Logger.Debug ("SynchronizedNoteXmlMatches");
 			try {
 				// TODO: I prefer XPath code.  Why doesn't this work? (SelectSingleNode returns null)
 				/*XmlDocument doc1 = new XmlDocument ();
@@ -793,6 +810,7 @@ namespace Tomboy.Sync
 		public static SyncState State
 		{
 			get {
+				Logger.Debug ("SyncState {0}", state);
 				return state;
 			}
 		}
@@ -805,6 +823,7 @@ namespace Tomboy.Sync
 			if (syncUI != null) {
 				// Notify the event handlers
 				try {
+					Logger.Debug ("SetState {0}", newState);
 					syncUI.SyncStateChanged (state);
 				} catch {}
 			}
@@ -816,6 +835,7 @@ namespace Tomboy.Sync
 		/// </summary>
 		private static SyncServiceAddin GetConfiguredSyncService ()
 		{
+			Logger.Debug ("GetConfiguredSyncService ()");
 			SyncServiceAddin addin = null;
 
 			string syncServiceId =
@@ -969,6 +989,7 @@ namespace Tomboy.Sync
 
 		public SyncLockInfo ()
 		{
+			Logger.Debug ("SyncLockInfo ()");
 			ClientId = Preferences.Get (Preferences.SYNC_CLIENT_ID) as string;
 			TransactionId = System.Guid.NewGuid ().ToString ();
 			RenewCount = 0;
