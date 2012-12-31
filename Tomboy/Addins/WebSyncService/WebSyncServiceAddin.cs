@@ -105,7 +105,9 @@ namespace Tomboy.WebSync
 		{
 			string serverPref;
 			Api.OAuth oauth;
-			GetConfigSettings (out oauth, out serverPref);
+			Logger.Debug ("Getting Configuration Settings");
+			bool result = GetConfigSettings (out oauth, out serverPref);
+			Logger.Debug ("Configuration settings Null or Empty?? {0}", result);
 			return new WebSyncServer (serverPref, oauth);
 		}
 

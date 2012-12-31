@@ -308,6 +308,7 @@ namespace Tomboy.Sync
 				try {
 					Logger.Debug ("Creating SyncServer");
 					server = addin.CreateSyncServer ();
+					Logger.Debug ("Finished creating SyncServer");
 					if (server == null)
 						throw new Exception ("addin.CreateSyncServer () returned null");
 				} catch (Exception e) {
@@ -317,6 +318,7 @@ namespace Tomboy.Sync
 					// TODO: Figure out a clever way to get the specific error up to the GUI
 				}
 				bool serverHasUpdates = false;
+				Logger.Debug ("Server Has Updates {0}", serverHasUpdates);
 				bool clientHasUpdates = client.DeletedNoteTitles.Count > 0;
 				Logger.Debug ("clientHasUpdates {0}", clientHasUpdates);
 				if (!clientHasUpdates) {

@@ -236,6 +236,7 @@ namespace Tomboy.Sync
 		public virtual IDictionary<string, string> DeletedNoteTitles
 		{
 			get {
+				Logger.Debug ("Returning {0} deletedNoteTiles", deletedNotes.Count);
 				return deletedNotes;
 			}
 		}
