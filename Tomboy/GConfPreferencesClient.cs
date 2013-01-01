@@ -10,7 +10,8 @@ namespace Tomboy
 
 		public GConfPreferencesClient ()
 		{
-			client = new GConf.Client ();
+			if (client == null)
+				client = new GConf.Client ();
 			wrapper_list = new List<NotifyWrapper> ();
 		}
 
