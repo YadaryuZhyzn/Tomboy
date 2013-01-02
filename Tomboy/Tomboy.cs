@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Mono.Unix;
-
+using DBus.GLib;
 using Tomboy.Sync;
+using DBus;
 
 namespace Tomboy
 {
@@ -26,6 +27,7 @@ namespace Tomboy
 		[STAThread]
 		public static void Main (string [] args)
 		{
+			BusG.Init ();
 			// TODO: Extract to a PreInit in Application, or something
 #if WIN32
 			string tomboy_path =

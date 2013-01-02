@@ -30,6 +30,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <ApplicationIcon>data\icons\tomboy.ico</ApplicationIcon>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <SchemaVersion>2.0</SchemaVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -73,6 +74,7 @@
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="atk-sharp, Version=2.12.0.0, Culture=neutral, PublicKeyToken=35e10195dab3c99f" />
@@ -108,6 +110,12 @@
     <Reference Include="System.Xml" />
     <Reference Include="System" />
     <Reference Include="Mono.Cairo" />
+    <Reference Include="dbus-sharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5675b0c3093115b5">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="dbus-sharp-glib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5675b0c3093115b5">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Tomboy\ActionManager.cs" />
@@ -216,16 +224,15 @@
     <None Include="Tomboy\Defines.cs.in" />
   </ItemGroup>
   <ItemGroup>
-    <JumpListIcons Include="data\icons\tomboy.ico;data\icons\new_note.ico;data\icons\note.ico;data\icons\search.ico" />
+    <JumpListIcons Include="data\icons\tomboy.ico%3Bdata\icons\new_note.ico%3Bdata\icons\note.ico%3Bdata\icons\search.ico" />
   </ItemGroup>
   <ItemGroup>
-    <BinaryContent Include="winbin\MonoPosixHelper.dll;winbin\Mono.Addins.dll.config" />
+    <BinaryContent Include="winbin\MonoPosixHelper.dll%3Bwinbin\Mono.Addins.dll.config" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>
     <MonoDevelop>
-      <Properties xmlns="">
-        <GtkDesignInfo gtkVersion="2.10.3" />
+      <Properties>
         <MonoDevelop.Autotools.MakefileInfo IntegrationEnabled="true" RelativeMakefileName="./Makefile.am" ExecuteTargetName="run">
           <BuildFilesVar />
           <DeployFilesVar />
