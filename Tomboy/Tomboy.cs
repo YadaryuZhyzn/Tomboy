@@ -1,6 +1,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.IO;
 using System.Xml;
 using Mono.Unix;
@@ -27,7 +28,7 @@ namespace Tomboy
 		[STAThread]
 		public static void Main (string [] args)
 		{
-			BusG.Init ();
+			dbus_bus_get ();
 			// TODO: Extract to a PreInit in Application, or something
 #if WIN32
 			string tomboy_path =
@@ -159,6 +160,10 @@ namespace Tomboy
 
 			Logger.Debug ("All done.  Ciao!");
 		}
+
+		// Hack to address threading bug in dbus. bgo #662358, 659756
+		[DllImport ("dbus-1")]
+    		private extern static IntPtr dbus_bus_get ();
 
 		public static bool Debugging
 		{
